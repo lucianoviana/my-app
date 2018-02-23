@@ -11,37 +11,19 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      history: [{
-        squares: Array(9).fill(null),
-      }],      
-      squares: Array(9).fill(null),
-      xIsNext: true,
-    }
-  }
   renderSquare(i) { 
     return (
       <Square 
-        value={this.state.squares[i]} 
-        onClick={() => this.handleClick(i)}
+        value={this.props.squares[i]} 
+        onClick={() => this.props.onClick(i)}
       />
     );
   }
 
   render() {
-    const win = calculateWinner(this.state.squares);
-    let status;
-    if (win){
-      status = 'Winner: ' + win;
-    } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    }
 
     return (
       <div>
-        <div className="status">{status}</div>
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -61,6 +43,43 @@ class Board extends React.Component {
     );
   }
 
+}
+
+class Game extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      history: [{
+        squares: Array(9).fill(null),
+      }],      
+      squares: Array(9).fill(null),
+      xIsNext: true,
+    }
+  }
+
+  render() {
+    const win = calculateWinner(this.state.squares);
+
+    let status;
+    if (win){
+      status = 'Winner: ' + win;
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+    }
+
+    return (
+      <div className="game">
+        <div className="game-board">
+          <Board squares={this.state.squares} xIsNext={this.state.xIsNext} onClick={(i) => this.handleClick(i)}/>
+        </div>
+        <div className="game-info">
+          <div>{status}</div>
+          <ol>{/* TODO */}</ol>
+        </div>
+      </div>
+    );
+  }
+
   handleClick(i) {
     if (calculateWinner(this.state.squares)) {
       return;
@@ -75,23 +94,6 @@ class Board extends React.Component {
       squares: squares,
       xIsNext: !this.state.xIsNext
     })
-  }
-}
-
-
-class Game extends React.Component {
-  render() {
-    return (
-      <div className="game">
-        <div className="game-board">
-          <Board />
-        </div>
-        <div className="game-info">
-          <div>{'a'}</div>
-          <ol>{/* TODO */}</ol>
-        </div>
-      </div>
-    );
   }
 }
 
