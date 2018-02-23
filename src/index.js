@@ -53,16 +53,30 @@ class Game extends React.Component {
         squares: Array(9).fill(null),
       }],      
       squares: Array(9).fill(null),
+      stepNumber: 0,
       xIsNext: true,
     }
   }
 
   render() {
-    const win = calculateWinner(this.state.squares);
+    const history = this.state.history;
+    const current = history[this.state.stepNumber];
+    const winner = calculateWinner(current.squares);
+
+    const moves = history.map((step, index) => {
+      const desc = index ?
+        'Go to move #' + index :
+        'Go to game start';
+      return (
+        <li>
+          <button onClick={() => this.jumpTo(index)}>{desc}</button>
+        </li>
+      );
+    });
 
     let status;
-    if (win){
-      status = 'Winner: ' + win;
+    if (winner){
+      status = 'Winner: ' + winner;
     } else {
       status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
     }
@@ -70,29 +84,40 @@ class Game extends React.Component {
     return (
       <div className="game">
         <div className="game-board">
-          <Board squares={this.state.squares} xIsNext={this.state.xIsNext} onClick={(i) => this.handleClick(i)}/>
+          <Board squares={current.squares} xIsNext={this.state.xIsNext} onClick={(i) => this.handleClick(i)}/>
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{/* TODO */}</ol>
+          <div>{moves}</div>
         </div>
       </div>
     );
   }
 
   handleClick(i) {
-    if (calculateWinner(this.state.squares)) {
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
       return;
     }
-    const squares = this.state.squares.slice();
     squares[i] = this.state.xIsNext ? 'X' : 'O';
-    const history = this.state.history.slice().concat({
-      squares: squares
-    });
     this.setState({
-      history: history,
+      history: history.concat([
+        {
+          squares: squares
+        }
+      ]),
       squares: squares,
-      xIsNext: !this.state.xIsNext
+      xIsNext: !this.state.xIsNext,
+      stepNumber: history.length,
+    })
+  }
+
+  jumpTo(step){
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) == 0,
     })
   }
 }
